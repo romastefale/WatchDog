@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WatchDog</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #141414;
+      --mute: #5a5a5a;
+      --rule: #d6d6d6;
+      --paper: #f7f6f2;
+      --code: #efeee9;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { background: var(--paper); color: var(--ink); }
+    body {
+      font-family: Newsreader, "Iowan Old Style", Georgia, serif;
+      font-size: 20px;
+      line-height: 1.55;
+      font-feature-settings: "onum", "kern";
+    }
+    article {
+      max-width: 38rem;
+      margin: 0 auto;
+      padding: 4.5rem 1.4rem 6rem;
+    }
+    .kicker {
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--mute);
+      margin-bottom: 1.1rem;
+    }
+    h1 {
+      font-size: clamp(2.6rem, 8vw, 3.6rem);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      line-height: 1.02;
+      margin-bottom: 0.7rem;
+    }
+    .deck {
+      font-size: 1.15rem;
+      line-height: 1.4;
+      color: var(--mute);
+      margin-bottom: 1.6rem;
+    }
+    .meta {
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 11px;
+      color: var(--mute);
+      letter-spacing: 0.04em;
+      padding-bottom: 1.4rem;
+      border-bottom: 1px solid var(--ink);
+      margin-bottom: 2.2rem;
+    }
+    h2 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin: 2.4rem 0 0.7rem;
+    }
+    p { margin: 0 0 1rem; }
+    p.lead { font-size: 1.08rem; }
+    a { color: var(--ink); text-underline-offset: 0.18em; }
+    code, pre {
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 0.72rem;
+      line-height: 1.55;
+    }
+    code { font-size: 0.78em; }
+    pre {
+      background: var(--code);
+      padding: 1rem 1.05rem;
+      margin: 1.1rem 0 1.4rem;
+      overflow-x: auto;
+      white-space: pre;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.86rem;
+      line-height: 1.35;
+      margin: 0.9rem 0 1.4rem;
+    }
+    th, td {
+      text-align: left;
+      vertical-align: top;
+      padding: 0.45rem 0.55rem 0.45rem 0;
+      border-bottom: 1px solid var(--rule);
+    }
+    th {
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 500;
+      color: var(--mute);
+    }
+    ul { margin: 0 0 1.2rem 1.1rem; }
+    li { margin: 0 0 0.35rem; }
+    .end {
+      margin-top: 2.6rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid var(--ink);
+      font-size: 0.95rem;
+      color: var(--mute);
+    }
+    @media (max-width: 520px) {
+      body { font-size: 18px; }
+      article { padding-top: 2.6rem; }
+    }
+    @media print {
+      html { background: #fff; }
+      article { padding: 0; max-width: none; }
+    }
+  </style>
+</head>
+<body>
+<article>
+  <p class="kicker">Nota técnica · iOS</p>
+  <h1>WatchDog</h1>
+  <p class="deck">O código <code>0x8BADF00D</code> mata o processo por atraso de cena. Não limpa heap. Não perfila. O relatório da morte é que sobra.</p>
+  <p class="meta">23 ago 2026 · amostra redigida · sem identificadores de dispositivo</p>
+
+  <p class="lead"><code>0x8BADF00D</code> — pronunciado <em>ate bad food</em> — é término forçado pelo sistema. Tipo: <code>EXC_CRASH (SIGKILL)</code>. Namespace: <code>FRONTBOARD</code> / <code>SPRINGBOARD</code>. Critério: wall-clock, não “bug lógico”.</p>
+
+  <h2>Mecânica</h2>
+  <p>O iOS mantém um watchdog de responsividade. Se o processo não completa certas transições de cena dentro de um allowance, o kernel entrega <code>SIGKILL</code>. Apple documenta o padrão em <em>Addressing watchdog terminations</em>.</p>
+  <table>
+    <thead><tr><th>Campo</th><th>Valor típico</th></tr></thead>
+    <tbody>
+      <tr><td>Exception Type</td><td><code>EXC_CRASH (SIGKILL)</code></td></tr>
+      <tr><td>Código</td><td><code>0x8BADF00D</code> = <code>2343432205</code><sub>10</sub></td></tr>
+      <tr><td>Evento</td><td><code>scene-create</code> ou <code>scene-update</code></td></tr>
+      <tr><td>Critério</td><td>tempo real esgotado</td></tr>
+    </tbody>
+  </table>
+  <p><code>scene-create</code> — primeira frame não renderizada a tempo. <code>scene-update</code> — UI não atualizou porque a main thread ficou ocupada ou à espera. Os timeouts não são API. Valores observados: ~20 s no launch em foreground; ~10 s em <code>scene-update</code> em background. Mudam por build.</p>
+
+  <h2>Amostra</h2>
+  <p>Envelope estrutural alinhado a autos reais de app de terceiros sob carga térmica e transição de cena. Bundle, PID e chaves de correlação omitidos.</p>
+<pre>Exception Type:  EXC_CRASH (SIGKILL)
+Exception Codes: 0x0000000000000000, 0x0000000000000000
+Termination Reason: FRONTBOARD 2343432205
+  &lt;RBSTerminateContext| domain:10 code:0x8BADF00D
+   explanation: scene-update watchdog transgression:
+   application&lt;[redacted]&gt;:pid exhausted real (wall clock)
+   time allowance of 10.00 seconds
+   ProcessVisibility: Background
+   ProcessState: Running
+   WatchdogEvent: scene-update
+   WatchdogVisibility: Background
+   WatchdogCPUStatistics: (
+     "Elapsed total CPU time (seconds): ~10–22",
+     "Elapsed application CPU time (seconds): ~0.0–10.3"
+   )
+   reportType:CrashLog
+   maxTerminationResistance: Interactive&gt;
+
+ThermalState: Serious</pre>
+  <p>Dez segundos no texto do motivo, não estimativa. Background encurta a janela. CPU do app pode ser alta ou quase zero: o critério é relógio de parede. Quando <code>application CPU ≈ 0%</code>, a leitura padrão é bloqueio ou deadlock. Quando se aproxima do allowance, a main thread estava queimando tempo.</p>
+
+  <h2>O que o código não prova</h2>
+  <table>
+    <thead><tr><th>Afirmação</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Zera heap para não vazar chaves</td><td>Não sustentada. Heap sanitization é outro domínio.</td></tr>
+      <tr><td>É mecanismo de perfilamento</td><td>O término é enforcement de responsividade. O crash report entrar em pipeline é fato separado.</td></tr>
+      <tr><td>É sempre falha do desenvolvedor</td><td>Falso. Deadlocks em frameworks da Apple, WebKit, MusicKit e layout infinito geram o mesmo código.</td></tr>
+    </tbody>
+  </table>
+  <p>O número só prova que o processo ultrapassou o orçamento de tempo real da transição de cena e foi morto.</p>
+
+  <h2>Gravidade operacional</h2>
+  <p><code>SIGKILL</code> não é recuperável. Não há handler. O processo some. O relatório vai para Crash Reporter. Com Analytics, amostra agregada pode chegar ao desenvolvedor via Organizer. Sem consentimento, o caminho interno permanece opaco.</p>
+  <p>Em background com thermal Serious, a margem de 10 s é estreita. Qualquer trabalho síncrono na main thread — I/O, lock, layout recursivo, callback de framework — basta. O mesmo código mata app próprio e de terceiros sem distinção.</p>
+  <p>A gravidade não está no hex. Está no direito da plataforma de abortar o processo por métrica de tempo e de registrar o estado da morte — visibilidade, térmica, CPU — no mesmo artefato.</p>
+
+  <h2>O que a comunidade já conhece</h2>
+  <ul>
+    <li>Documentação Apple: <a href="https://developer.apple.com/documentation/xcode/addressing-watchdog-terminations">Addressing watchdog terminations</a> — código, diferença create/update, leitura de <code>WatchdogCPUStatistics</code>.</li>
+    <li>TN2151 e material histórico: <code>0x8badf00d</code> = watchdog timeout (launch, terminate, system events).</li>
+    <li>Developer Forums: timeouts não são contrato; background costuma ser mais agressivo.</li>
+    <li>Issues públicos (React Native, Core Data, MusicKit, layout): o mesmo <code>FRONTBOARD 2343432205</code> + <code>scene-update</code> + <code>10.00 seconds</code>.</li>
+  </ul>
+  <p>Isso é engenharia de app, não doutrina de privacidade.</p>
+
+  <h2>O que não está documentado</h2>
+  <table>
+    <thead><tr><th>Tema</th><th>Público</th><th>Não visto como especificação</th></tr></thead>
+    <tbody>
+      <tr><td>Watchdog como deadline de UI</td><td>Documentado</td><td>—</td></tr>
+      <tr><td>Crash report → diagnóstico</td><td>Analytics / Organizer</td><td>Grafo interno pós-ingest</td></tr>
+      <tr><td>Envelope JSON unificado (sessão, sample rate, flush)</td><td>Observável em dumps locais</td><td>Contrato de “perfilamento contínuo”</td></tr>
+      <tr><td><code>0x8BADF00D</code> como sanitização criptográfica</td><td>—</td><td>Nunca documentado. Autos de cena apontam o contrário.</td></tr>
+      <tr><td>Join cross-app no servidor</td><td>IDFV é por-vendor; CRK existe no report</td><td>Modelo completo de correlação</td></tr>
+    </tbody>
+  </table>
+  <p>A premissa que cabe dizer com cuidado: um sistema que mata processos por tempo real e arquiva o estado da morte cria, por construção, uma superfície de observação. Isso não transforma o watchdog em instrumento de privacidade. Transforma o artefato de término em input de telemetria. A telemetria, uma vez unificada, é o que carrega peso ético — não o hex.</p>
+  <p>Conflar os dois é erro técnico. Separá-los é o mínimo.</p>
+
+  <p class="end">Referência primária: Apple Developer Documentation — <em>Addressing watchdog terminations</em>. Tudo além disso exige evidência separada de <code>0x8BADF00D</code>.</p>
+</article>
+</body>
+</html>
